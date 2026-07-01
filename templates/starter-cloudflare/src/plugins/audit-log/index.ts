@@ -103,6 +103,33 @@ const definition: PluginDefinition = {
         });
       },
     },
+
+    "cron": {
+      handler: async (_event, ctx) => {
+        const cutoff = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString();
+        let purged = 0;
+        let cursor: string | undefined;
+
+        do {
+          const result = await (ctx.storage as any).entries.query({
+            where: { occurred_at: { lt: cutoff } },
+            orderBy: { occurred_at: "asc" },
+            limit: 100,
+            cursor,
+          }) as { items: Array<{ id: string }>; hasMore: boolean; cursor?: string };
+
+          if (result.items.length > 0) {
+            const ids = result.items.map((item) => item.id);
+            const deleted = await (ctx.storage as any).entries.deleteMany(ids);
+            purged += typeof deleted === "number" ? deleted : ids.length;
+          }
+
+          cursor = result.cursor;
+        } while (cursor && cursor !== "");
+
+        ctx.log.info(`Audit log purge: removed ${purged} entries older than 90 days`);
+      },
+    },
   },
   routes: {
     "entries": {
