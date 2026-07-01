@@ -39,6 +39,24 @@
 					"slug": "excerpt",
 					"label": "Excerpt",
 					"type": "text"
+				},
+				{
+					"slug": "locale",
+					"label": "Locale",
+					"type": "select",
+					"required": true,
+					"defaultValue": "en",
+					"options": [
+						{ "label": "English", "value": "en" },
+						{ "label": "Thai", "value": "th" }
+					]
+				},
+				{
+					"slug": "translation_of",
+					"label": "Translation of (original record)",
+					"type": "relationship",
+					"required": false,
+					"collection": "posts"
 				}
 			]
 		},
@@ -61,6 +79,24 @@
 					"label": "Content",
 					"type": "portableText",
 					"searchable": true
+				},
+				{
+					"slug": "locale",
+					"label": "Locale",
+					"type": "select",
+					"required": true,
+					"defaultValue": "en",
+					"options": [
+						{ "label": "English", "value": "en" },
+						{ "label": "Thai", "value": "th" }
+					]
+				},
+				{
+					"slug": "translation_of",
+					"label": "Translation of (original record)",
+					"type": "relationship",
+					"required": false,
+					"collection": "pages"
 				}
 			]
 		}
