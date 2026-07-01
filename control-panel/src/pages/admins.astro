@@ -1,0 +1,77 @@
+---
+import Base from '../layouts/Base.astro';
+import { getSuperAdmins, addSuperAdmin, removeSuperAdmin } from '../lib/db';
+
+const db = Astro.locals.runtime.env.DB;
+let error = '';
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const action = form.get('action') as string;
+
+  if (action === 'add') {
+    const email = (form.get('email') as string)?.trim();
+    const name = (form.get('name') as string)?.trim();
+    if (!email || !name) {
+      error = 'Name and email are required.';
+    } else {
+      await addSuperAdmin(db, email, name);
+    }
+  } else if (action === 'remove') {
+    const id = parseInt(form.get('id') as string, 10);
+    await removeSuperAdmin(db, id);
+  }
+}
+
+const admins = await getSuperAdmins(db);
+---
+<Base title="Super Admins">
+  <h1>Super Admins</h1>
+  <p style="color:#6b7280;margin-bottom:1.5rem;font-size:0.875rem">
+    Staff who have access to this Control Panel. All super admins have full access.
+  </p>
+
+  {error && <p style="color:#ef4444;margin-bottom:1rem">{error}</p>}
+
+  <table style="margin-bottom:2rem">
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Added</th><th></th></tr>
+    </thead>
+    <tbody>
+      {admins.map(admin => (
+        <tr>
+          <td>{admin.name}</td>
+          <td>{admin.email}</td>
+          <td style="color:#6b7280">{new Date(admin.created_at).toLocaleDateString()}</td>
+          <td>
+            <form method="POST" style="display:inline">
+              <input type="hidden" name="action" value="remove" />
+              <input type="hidden" name="id" value={admin.id} />
+              <button type="submit" class="btn btn-danger" style="padding:0.25rem 0.75rem"
+                onclick="return confirm('Remove this admin?')">Remove</button>
+            </form>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  <h2 style="font-size:1rem;margin-bottom:1rem">Invite New Admin</h2>
+  <form method="POST" style="display:flex;gap:0.75rem;align-items:flex-end;flex-wrap:wrap">
+    <input type="hidden" name="action" value="add" />
+    <label>
+      <span style="display:block;font-size:0.8rem;font-weight:500;margin-bottom:4px">Name</span>
+      <input name="name" type="text" placeholder="Jane Smith" required
+        style="padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.875rem" />
+    </label>
+    <label>
+      <span style="display:block;font-size:0.8rem;font-weight:500;margin-bottom:4px">Company Email</span>
+      <input name="email" type="email" placeholder="jane@company.com" required
+        style="padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.875rem;width:240px" />
+    </label>
+    <button type="submit" class="btn btn-primary">Add Admin</button>
+  </form>
+  <p style="margin-top:0.75rem;font-size:0.75rem;color:#6b7280">
+    Access is enforced by Cloudflare Access policy. Adding an email here records the admin but Cloudflare Access controls actual login.
+  </p>
+</Base>
