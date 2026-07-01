@@ -1,0 +1,7 @@
+# control-panel is a standalone Astro SSR app, not part of the monorepo workspace.
+# These allowBuilds entries are needed because the monorepo root pnpm-workspace.yaml
+# has strictDepBuilds: true and does not include esbuild/sharp/workerd for this path.
+allowBuilds:
+  esbuild: true
+  sharp: true
+  workerd: true

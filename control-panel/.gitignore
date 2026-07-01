@@ -1,0 +1,17 @@
+# Build output
+dist/
+.output/
+
+# Astro
+.astro/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local

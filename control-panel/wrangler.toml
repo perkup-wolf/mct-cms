@@ -1,0 +1,12 @@
+name = "company-control-panel"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "control-panel-registry"
+database_id = "REPLACE_AFTER_CREATION"
+
+[vars]
+CF_ACCOUNT_ID = ""   # set via Cloudflare Pages dashboard env vars, not here
