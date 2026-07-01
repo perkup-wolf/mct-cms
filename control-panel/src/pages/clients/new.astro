@@ -1,0 +1,71 @@
+---
+import Base from '../../layouts/Base.astro';
+import { createClient, updateClientStatus } from '../../lib/db';
+import { provisionClient } from '../../lib/provision';
+
+let error = '';
+let success = false;
+
+if (Astro.request.method === 'POST') {
+  const form = await Astro.request.formData();
+  const name = (form.get('name') as string)?.trim();
+  const domain = (form.get('domain') as string)?.trim();
+  const adminEmail = (form.get('admin_email') as string)?.trim();
+
+  if (!name || !domain || !adminEmail) {
+    error = 'All fields are required.';
+  } else {
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const db = Astro.locals.runtime.env.DB;
+    const env = Astro.locals.runtime.env;
+
+    const clientId = await createClient(db, { name, slug, domain, admin_email: adminEmail });
+
+    try {
+      const { workerId, dbId, r2Bucket } = await provisionClient(env, { slug, adminEmail, domain });
+      await updateClientStatus(db, clientId, 'active', { worker_name: workerId, db_id: dbId, r2_bucket: r2Bucket });
+      return Astro.redirect(`/clients/${clientId}`);
+    } catch (e) {
+      await updateClientStatus(db, clientId, 'error');
+      error = `Provisioning failed: ${(e as Error).message}`;
+    }
+  }
+}
+---
+<Base title="New Client">
+  <div style="max-width:480px">
+    <h1>New Client Instance</h1>
+    <p style="color:#6b7280;margin-bottom:1.5rem;font-size:0.875rem">
+      Provisions a Cloudflare Worker, D1 database, R2 bucket, and custom hostname for the client.
+    </p>
+
+    {error && <p style="color:#ef4444;margin-bottom:1rem">{error}</p>}
+
+    <form method="POST" style="display:flex;flex-direction:column;gap:1rem">
+      <label>
+        <span style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:4px">Client Name</span>
+        <input name="name" type="text" placeholder="Acme Corp" required
+          style="width:100%;padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.875rem" />
+      </label>
+
+      <label>
+        <span style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:4px">Client Domain</span>
+        <input name="domain" type="text" placeholder="acmecorp.com" required
+          style="width:100%;padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.875rem" />
+        <span style="font-size:0.75rem;color:#6b7280">Admin panel will be at cms.acmecorp.com</span>
+      </label>
+
+      <label>
+        <span style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:4px">Client Admin Email</span>
+        <input name="admin_email" type="email" placeholder="admin@acmecorp.com" required
+          style="width:100%;padding:0.5rem 0.75rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.875rem" />
+        <span style="font-size:0.75rem;color:#6b7280">An invite email will be sent to this address.</span>
+      </label>
+
+      <div style="display:flex;gap:0.75rem;margin-top:0.5rem">
+        <button type="submit" class="btn btn-primary">Provision Instance</button>
+        <a href="/" class="btn" style="background:#e5e7eb;color:#374151">Cancel</a>
+      </div>
+    </form>
+  </div>
+</Base>
