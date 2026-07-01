@@ -16,7 +16,7 @@ export default defineConfig({
 		emdash({
 			database: d1({ binding: "DB", session: "auto" }),
 			storage: r2({ binding: "MEDIA" }),
-			admin: { siteName: "MCT CMS", logo: "/brand/logo-default.svg", favicon: "/brand/favicon.svg" },
+			admin: { siteName: "MCT CMS", logo: "/_brand/logo", favicon: "/brand/favicon.svg" },
 		}),
 	],
 	devToolbar: { enabled: false },
