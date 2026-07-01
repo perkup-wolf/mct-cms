@@ -60,7 +60,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		// Build magic link config using stored site URL (not request Host header)
 		const options = new OptionsRepository(emdash.db);
 		const baseUrl = await getSiteBaseUrl(emdash.db, request);
-		const siteName = (await options.get<string>("emdash:site_title")) ?? "EmDash";
+		const siteName = (await options.get<string>("emdash:site_title")) ?? "MCT CMS";
 
 		const config: MagicLinkConfig = {
 			baseUrl,

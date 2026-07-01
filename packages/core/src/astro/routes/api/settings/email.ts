@@ -107,7 +107,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 		if (isParseError(body)) return body;
 
 		const optionsRepo = new OptionsRepository(emdash.db);
-		const siteName = (await optionsRepo.get<string>("emdash:site_title")) ?? "EmDash";
+		const siteName = (await optionsRepo.get<string>("emdash:site_title")) ?? "MCT CMS";
 		const safeName = escapeHtml(siteName);
 
 		await emdash.email.send(

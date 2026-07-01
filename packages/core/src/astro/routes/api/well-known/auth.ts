@@ -22,11 +22,11 @@ export const GET: APIRoute = async ({ locals }) => {
 	const isExternal = authMode?.type === "external";
 
 	// Try to read site name from DB options
-	let siteName = "EmDash";
+	let siteName = "MCT CMS";
 	if (emdash?.db) {
 		try {
 			const options = new OptionsRepository(emdash.db);
-			siteName = (await options.get<string>("emdash:site_title")) || "EmDash";
+			siteName = (await options.get<string>("emdash:site_title")) || "MCT CMS";
 		} catch {
 			// DB may not be initialized yet
 		}

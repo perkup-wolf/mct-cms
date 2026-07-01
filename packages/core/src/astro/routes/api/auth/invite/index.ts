@@ -44,7 +44,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
 		// Get site config for invite email
 		const options = new OptionsRepository(emdash.db);
-		const siteName = (await options.get<string>("emdash:site_title")) || "EmDash";
+		const siteName = (await options.get<string>("emdash:site_title")) || "MCT CMS";
 
 		// Use stored site URL to prevent Host header spoofing in invite emails
 		const baseUrl = await getSiteBaseUrl(emdash.db, request);
