@@ -1,0 +1,54 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getClient } from '../../lib/db';
+
+const id = parseInt(Astro.params.id ?? '0', 10);
+const db = Astro.locals.runtime.env.DB;
+const client = await getClient(db, id);
+
+if (!client) return Astro.redirect('/');
+---
+<Base title={client.name}>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+    <h1>{client.name}</h1>
+    <span class={`badge badge-${client.status}`}>{client.status}</span>
+  </div>
+
+  <div style="background:white;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.08);padding:1.5rem;display:grid;gap:1rem;max-width:640px">
+    <div>
+      <dt style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:2px">Admin Panel URL</dt>
+      <dd><a href={`https://cms.${client.domain}`} target="_blank" rel="noopener">https://cms.{client.domain}</a></dd>
+    </div>
+    <div>
+      <dt style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:2px">Admin Email</dt>
+      <dd>{client.admin_email}</dd>
+    </div>
+    <div>
+      <dt style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:2px">Worker Name</dt>
+      <dd>{client.worker_name ?? '—'}</dd>
+    </div>
+    <div>
+      <dt style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:2px">D1 Database ID</dt>
+      <dd style="font-family:monospace;font-size:0.8rem">{client.db_id ?? '—'}</dd>
+    </div>
+    <div>
+      <dt style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:2px">R2 Bucket</dt>
+      <dd>{client.r2_bucket ?? '—'}</dd>
+    </div>
+    <div>
+      <dt style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:2px">Created</dt>
+      <dd>{new Date(client.created_at).toLocaleString()}</dd>
+    </div>
+    <div>
+      <dt style="font-size:0.75rem;color:#6b7280;text-transform:uppercase;margin-bottom:2px">Last Health Check</dt>
+      <dd>{client.last_checked ? new Date(client.last_checked).toLocaleString() : 'Not yet checked'}</dd>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem">
+    <a href={`https://cms.${client.domain}/_emdash/admin`} target="_blank" rel="noopener" class="btn btn-primary">
+      Open Admin Panel →
+    </a>
+    <a href="/" class="btn" style="margin-left:0.75rem;background:#e5e7eb;color:#374151">← Back to Clients</a>
+  </div>
+</Base>
