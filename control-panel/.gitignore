@@ -11,6 +11,9 @@ node_modules/
 # Logs
 *.log
 
+# Wrangler local state
+.wrangler/
+
 # Environment
 .env
 .env.local

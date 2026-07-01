@@ -8,5 +8,6 @@ binding = "DB"
 database_name = "control-panel-registry"
 database_id = "REPLACE_AFTER_CREATION"
 
-[vars]
-CF_ACCOUNT_ID = ""   # set via Cloudflare Pages dashboard env vars, not here
+# Environment variables — set all secrets in Cloudflare Pages dashboard
+# (Settings → Environment Variables), NOT here:
+#   CF_API_TOKEN, CF_ACCOUNT_ID, CF_ZONE_ID
