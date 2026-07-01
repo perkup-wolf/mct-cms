@@ -104,7 +104,36 @@ const definition: PluginDefinition = {
       },
     },
   },
-  routes: {},  // filled in Task 3
+  routes: {
+    "entries": {
+      public: false,
+      handler: async (ctx) => {
+        const input = ctx.input as {
+          category?: string;
+          from?: string;
+          to?: string;
+          cursor?: string;
+          limit?: number;
+        };
+
+        const where: Record<string, unknown> = {};
+        if (input.category) where.category = input.category;
+        if (input.from || input.to) {
+          where.occurred_at = {
+            ...(input.from ? { gte: input.from } : {}),
+            ...(input.to ? { lte: input.to } : {}),
+          };
+        }
+
+        return (ctx.storage as any).entries.query({
+          where: Object.keys(where).length > 0 ? where : undefined,
+          orderBy: { occurred_at: "desc" },
+          limit: Math.min(input.limit ?? 50, 100),
+          cursor: input.cursor,
+        });
+      },
+    },
+  },
 };
 
 export function createPlugin() {
