@@ -6,6 +6,8 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "control-panel-registry"
+# TODO (pre-deploy): Replace with real ID from:
+#   wrangler d1 create control-panel-registry
 database_id = "REPLACE_AFTER_CREATION"
 
 # Environment variables — set all secrets in Cloudflare Pages dashboard
