@@ -19,7 +19,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 
-import { apiFetch, fetchAuthMode } from "../lib/api";
+import { apiFetch, fetchAuthMode, fetchManifest } from "../lib/api";
 import { useAuthProviderList } from "../lib/auth-provider-context";
 import { sanitizeRedirectUrl } from "../lib/url";
 import { SUPPORTED_LOCALES } from "../locales/index.js";
@@ -178,6 +178,12 @@ export function LoginPage({ redirectUrl = "/_emdash/admin" }: LoginPageProps) {
 		queryFn: fetchAuthMode,
 	});
 
+	// Fetch manifest to get admin branding (siteName, logo)
+	const { data: manifest } = useQuery({
+		queryKey: ["manifest"],
+		queryFn: fetchManifest,
+	});
+
 	// Redirect to admin when using external auth (authentication is handled externally)
 	React.useEffect(() => {
 		if (authInfo?.authMode && authInfo.authMode !== "passkey") {
@@ -211,7 +217,11 @@ export function LoginPage({ redirectUrl = "/_emdash/admin" }: LoginPageProps) {
 		return (
 			<div className="min-h-screen flex items-center justify-center bg-kumo-base p-4">
 				<div className="flex flex-col items-center">
-					<BrandLogo className="h-10 mb-4" />
+					<BrandLogo
+						logoUrl={manifest?.admin?.logo}
+						siteName={manifest?.admin?.siteName}
+						className="h-10 mb-4"
+					/>
 					<Loader />
 				</div>
 			</div>
@@ -223,7 +233,11 @@ export function LoginPage({ redirectUrl = "/_emdash/admin" }: LoginPageProps) {
 			<div className="w-full max-w-md">
 				{/* Header */}
 				<div className="text-center mb-8">
-					<BrandLogo className="h-10 mx-auto mb-2" />
+					<BrandLogo
+						logoUrl={manifest?.admin?.logo}
+						siteName={manifest?.admin?.siteName}
+						className="h-10 mx-auto mb-2"
+					/>
 					<h1 className="text-2xl font-semibold text-kumo-default">
 						{method === "magic-link"
 							? t`Sign in with email`

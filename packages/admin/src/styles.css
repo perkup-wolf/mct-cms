@@ -36,6 +36,17 @@
 	--text-color-kumo-brand: #2271b1;
 }
 
+[data-theme="company"] {
+  --color-kumo-brand: #1a56db;
+  --color-kumo-brand-hover: #1648c4;
+  --text-color-kumo-brand: #1a56db;
+}
+
+[data-theme="company"]:not([data-mode="dark"]) {
+  --color-kumo-ring: #1a56db;
+  --text-color-kumo-link: #1a56db;
+}
+
 [data-theme="classic"]:not([data-mode="dark"]) {
 	/* Surfaces */
 	--color-kumo-canvas: oklch(98.75% 0 0);
