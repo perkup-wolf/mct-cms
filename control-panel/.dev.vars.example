@@ -1,4 +1,0 @@
-# Copy to .dev.vars and fill in your values (this file is safe to commit)
-CF_API_TOKEN=your_real_token_here
-CF_ACCOUNT_ID=your_account_id
-CF_ZONE_ID=your_zone_id
