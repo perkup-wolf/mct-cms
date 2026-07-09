@@ -1,9 +1,20 @@
 ---
 import Base from "../layouts/Base.astro";
+import "../styles/tailwind.css";
 ---
 
 <Base title="Not Found">
-	<h1>Page not found</h1>
-	<p>The page you're looking for doesn't exist.</p>
-	<a href="/">Go home</a>
+	<div class="flex flex-col items-center gap-4 py-16 text-center">
+		<span class="rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-700 uppercase">
+			Tailwind test page
+		</span>
+		<h1 class="text-4xl font-bold text-slate-900">Page not found</h1>
+		<p class="max-w-sm text-slate-500">The page you're looking for doesn't exist.</p>
+		<a
+			href="/"
+			class="mt-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-indigo-700"
+		>
+			Go home
+		</a>
+	</div>
 </Base>

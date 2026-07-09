@@ -41,22 +41,9 @@
 					"type": "text"
 				},
 				{
-					"slug": "locale",
-					"label": "Locale",
-					"type": "select",
-					"required": true,
-					"defaultValue": "en",
-					"options": [
-						{ "label": "English", "value": "en" },
-						{ "label": "Thai", "value": "th" }
-					]
-				},
-				{
-					"slug": "translation_of",
-					"label": "Translation of (original record)",
-					"type": "reference",
-					"required": false,
-					"collection": "posts"
+					"slug": "test_custom_field",
+					"label": "Test custom field",
+					"type": "text"
 				}
 			]
 		},
@@ -79,24 +66,33 @@
 					"label": "Content",
 					"type": "portableText",
 					"searchable": true
+				}
+			]
+		},
+		{
+			"slug": "site_appearance",
+			"label": "Site Appearance",
+			"labelSingular": "Site Appearance",
+			"supports": [],
+			"fields": [
+				{
+					"slug": "grayscale",
+					"label": "Grayscale mode",
+					"type": "boolean",
+					"defaultValue": false,
+					"helpText": "Renders the entire public site in grayscale. Toggle to test passing a CMS-controlled value through to the site's CSS."
 				},
 				{
-					"slug": "locale",
-					"label": "Locale",
+					"slug": "default_language",
+					"label": "Default language",
 					"type": "select",
 					"required": true,
 					"defaultValue": "en",
 					"options": [
 						{ "label": "English", "value": "en" },
 						{ "label": "Thai", "value": "th" }
-					]
-				},
-				{
-					"slug": "translation_of",
-					"label": "Translation of (original record)",
-					"type": "reference",
-					"required": false,
-					"collection": "pages"
+					],
+					"helpText": "Locale served when a visitor hasn't picked one (no ?lang= in the URL)."
 				}
 			]
 		}
@@ -212,11 +208,23 @@
 				}
 			}
 		],
+		"site_appearance": [
+			{
+				"id": "default",
+				"slug": "default",
+				"status": "published",
+				"data": {
+					"grayscale": false,
+					"default_language": "th"
+				}
+			}
+		],
 		"posts": [
 			{
 				"id": "post-1",
 				"slug": "welcome",
 				"status": "published",
+				"locale": "en",
 				"data": {
 					"title": "Welcome",
 					"excerpt": "Your first post. Replace this with your own content.",
@@ -252,6 +260,59 @@
 								{
 									"_type": "span",
 									"text": "Open the admin panel to add content, or edit the Astro pages in src/pages to change how content is displayed.",
+									"_key": "k5"
+								}
+							],
+							"_key": "k4"
+						}
+					]
+				},
+				"taxonomies": {
+					"category": ["general"],
+					"tag": ["starter", "example"]
+				}
+			},
+			{
+				"id": "post-1-th",
+				"slug": "welcome",
+				"status": "published",
+				"locale": "th",
+				"translationOf": "post-1",
+				"data": {
+					"title": "ยินดีต้อนรับ",
+					"excerpt": "โพสต์แรกของคุณ แทนที่เนื้อหานี้ด้วยเนื้อหาของคุณเอง",
+					"content": [
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "นี่คือโพสต์เริ่มต้น เทมเพลตในโปรเจกต์นี้แสดงรูปแบบพื้นฐานสำหรับการค้นหาและแสดงผลเนื้อหา EmDash แทนที่ด้วยดีไซน์ของคุณเอง",
+									"_key": "k1"
+								}
+							],
+							"_key": "k0"
+						},
+						{
+							"_type": "block",
+							"style": "h2",
+							"children": [
+								{
+									"_type": "span",
+									"text": "ขั้นตอนต่อไป",
+									"_key": "k3"
+								}
+							],
+							"_key": "k2"
+						},
+						{
+							"_type": "block",
+							"style": "normal",
+							"children": [
+								{
+									"_type": "span",
+									"text": "เปิดแผงผู้ดูแลระบบเพื่อเพิ่มเนื้อหา หรือแก้ไขหน้า Astro ใน src/pages เพื่อเปลี่ยนวิธีแสดงเนื้อหา",
 									"_key": "k5"
 								}
 							],

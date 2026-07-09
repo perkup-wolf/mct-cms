@@ -2,8 +2,10 @@
 import { getTerm, getEmDashCollection, decodeSlug } from "emdash";
 import { Image } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { getRequestLocale, localeHref } from "../../utils/locale-href";
 
 const slug = decodeSlug(Astro.params.slug);
+const { locale, defaultLocale } = await getRequestLocale(Astro.url);
 const term = slug ? await getTerm("tag", slug) : null;
 
 if (!term) {
@@ -13,6 +15,7 @@ if (!term) {
 const { entries: posts } = await getEmDashCollection("posts", {
 	where: { tag: term.slug },
 	orderBy: { published_at: "desc" },
+	locale,
 });
 ---
 
@@ -21,16 +24,16 @@ const { entries: posts } = await getEmDashCollection("posts", {
 	description={`Posts tagged ${term.label}`}
 >
 	<h1>Tag: {term.label}</h1>
-	<p>{posts.length} {posts.length === 1 ? "post" : "posts"}</p>
+	<p class="post-meta">{posts.length} {posts.length === 1 ? "post" : "posts"}</p>
 
 	{
 		posts.length === 0 ? (
 			<p>No posts with this tag yet.</p>
 		) : (
-			<ul>
+			<ul class="post-list">
 				{posts.map((post) => (
 					<li>
-						<a href={`/posts/${post.id}`}>
+						<a href={localeHref(`/posts/${post.id}`, locale, defaultLocale)}>
 							{post.data.featured_image && (
 								<Image image={post.data.featured_image} />
 							)}

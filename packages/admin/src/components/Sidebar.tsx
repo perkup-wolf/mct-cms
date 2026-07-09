@@ -425,12 +425,9 @@ export function SidebarNav({ manifest }: SidebarNavProps) {
 					<BrandIcon
 						logoUrl={manifest.admin?.logo}
 						siteName={manifest.admin?.siteName}
-						className="size-5 shrink-0"
+						className="h-8 w-auto max-w-[140px] shrink-0 group-data-[state=collapsed]/sidebar:h-5 group-data-[state=collapsed]/sidebar:max-w-8"
 						aria-hidden="true"
 					/>
-					<span className="font-semibold truncate group-data-[state=collapsed]/sidebar:hidden">
-						{manifest.admin?.siteName || "EmDash"}
-					</span>
 				</Link>
 			</KumoSidebar.Header>
 

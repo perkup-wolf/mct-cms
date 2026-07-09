@@ -1,16 +1,18 @@
 ---
-import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
+import { getEmDashEntry, getSeoMeta, getTranslations, decodeSlug, getSiteSettings } from "emdash";
 import { Image, PortableText, WidgetArea } from "emdash/ui";
 import Base from "../../layouts/Base.astro";
+import { getRequestLocale, localeHref } from "../../utils/locale-href";
 import { resolveStarterSiteIdentity } from "../../utils/site-identity";
 
 const slug = decodeSlug(Astro.params.slug);
+const { locale, defaultLocale } = await getRequestLocale(Astro.url);
 
 if (!slug) {
 	return Astro.redirect("/404");
 }
 
-const { entry: post, cacheHint } = await getEmDashEntry("posts", slug);
+const { entry: post, cacheHint } = await getEmDashEntry("posts", slug, { locale });
 
 if (!post) {
 	return Astro.redirect("/404");
@@ -18,6 +20,11 @@ if (!post) {
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 const { siteTitle } = resolveStarterSiteIdentity(await getSiteSettings());
+
+const { translations } = await getTranslations("posts", post.data.id);
+const localizedPaths = Object.fromEntries(
+	translations.map((t) => [t.locale, localeHref(`/posts/${t.slug}`, t.locale, defaultLocale)]),
+);
 
 // SEO meta from content fields
 const seo = getSeoMeta(post, {
@@ -38,47 +45,50 @@ const categories = post.data.terms?.category ?? [];
 	canonical={seo.canonical}
 	image={seo.ogImage}
 	content={{ collection: "posts", id: post.data.id, slug }}
+	localizedPaths={localizedPaths}
 >
 	<article>
+		<h1 {...post.edit.title}>{post.data.title}</h1>
+
+		<div class="post-meta">
+			{
+				post.data.publishedAt && (
+					<time datetime={post.data.publishedAt.toISOString()}>
+						{post.data.publishedAt.toLocaleDateString("en-US", {
+							year: "numeric",
+							month: "long",
+							day: "numeric",
+						})}
+					</time>
+				)
+			}
+			{
+				categories.length > 0 && (
+					<span class="tag-list">
+						{categories.map((c) => (
+							<a href={localeHref(`/category/${c.slug}`, locale, defaultLocale)}>{c.label}</a>
+						))}
+					</span>
+				)
+			}
+		</div>
+
 		{
 			post.data.featured_image && (
-				<div {...post.edit.featured_image}>
+				<div class="post-featured-image" {...post.edit.featured_image}>
 					<Image image={post.data.featured_image} />
 				</div>
 			)
 		}
 
-		<h1 {...post.edit.title}>{post.data.title}</h1>
-
-		{
-			post.data.publishedAt && (
-				<time datetime={post.data.publishedAt.toISOString()}>
-					{post.data.publishedAt.toLocaleDateString("en-US", {
-						year: "numeric",
-						month: "long",
-						day: "numeric",
-					})}
-				</time>
-			)
-		}
-
-		{
-			categories.length > 0 && (
-				<div>
-					{categories.map((c) => (
-						<a href={`/category/${c.slug}`}>{c.label}</a>
-					))}
-				</div>
-			)
-		}
-
 		<PortableText value={post.data.content} />
+		{post.data.test_custom_field && <p>{post.data.test_custom_field}</p>}
 
 		{
 			tags.length > 0 && (
-				<div>
+				<div class="tag-list">
 					{tags.map((t) => (
-						<a href={`/tag/${t.slug}`}>{t.label}</a>
+						<a href={localeHref(`/tag/${t.slug}`, locale, defaultLocale)}>{t.label}</a>
 					))}
 				</div>
 			)
@@ -89,3 +99,13 @@ const categories = post.data.terms?.category ?? [];
 		<WidgetArea name="sidebar" />
 	</aside>
 </Base>
+
+<style>
+	.post-featured-image {
+		margin: var(--space-3) 0 var(--space-4);
+	}
+
+	.post-featured-image :global(img) {
+		border-radius: var(--radius);
+	}
+</style>

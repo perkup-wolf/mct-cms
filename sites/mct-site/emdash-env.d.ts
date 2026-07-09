@@ -23,9 +23,24 @@ export interface Post {
   slug: string | null;
   status: string;
   title: string;
-  featured_image?: { id: string; src?: string; alt?: string; width?: number; height?: number };
+  featured_image?: { id: string; src?: string; alt?: string; width?: number; height?: number; provider?: string; previewUrl?: string; meta?: Record<string, unknown> };
   content?: PortableTextBlock[];
   excerpt?: string;
+  locale: string;
+  test_custom_field?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  publishedAt: Date | null;
+  bylines?: ContentBylineCredit[];
+  terms?: Record<string, TaxonomyTerm[]>;
+}
+
+export interface SiteAppearance {
+  id: string;
+  slug: string | null;
+  status: string;
+  grayscale?: boolean;
+  default_language: string;
   createdAt: Date;
   updatedAt: Date;
   publishedAt: Date | null;
@@ -37,5 +52,6 @@ declare module "emdash" {
   interface EmDashCollections {
     pages: Page;
     posts: Post;
+    site_appearance: SiteAppearance;
   }
 }

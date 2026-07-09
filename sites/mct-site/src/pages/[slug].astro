@@ -1,16 +1,18 @@
 ---
-import { getEmDashEntry, getSeoMeta, decodeSlug, getSiteSettings } from "emdash";
+import { getEmDashEntry, getSeoMeta, getTranslations, decodeSlug, getSiteSettings } from "emdash";
 import { PortableText } from "emdash/ui";
 import Base from "../layouts/Base.astro";
+import { getRequestLocale, localeHref } from "../utils/locale-href";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
 
 const slug = decodeSlug(Astro.params.slug);
+const { locale, defaultLocale } = await getRequestLocale(Astro.url);
 
 if (!slug) {
 	return Astro.redirect("/404");
 }
 
-const { entry: page, cacheHint } = await getEmDashEntry("pages", slug);
+const { entry: page, cacheHint } = await getEmDashEntry("pages", slug, { locale });
 
 if (!page) {
 	return Astro.redirect("/404");
@@ -24,6 +26,11 @@ const seo = getSeoMeta(page, {
 	siteUrl: Astro.url.origin,
 	path: `/${slug}`,
 });
+
+const { translations } = await getTranslations("pages", page.data.id);
+const localizedPaths = Object.fromEntries(
+	translations.map((t) => [t.locale, localeHref(`/${t.slug}`, t.locale, defaultLocale)]),
+);
 ---
 
 <Base
@@ -32,6 +39,7 @@ const seo = getSeoMeta(page, {
 	description={seo.description}
 	canonical={seo.canonical}
 	content={{ collection: "pages", id: page.data.id, slug }}
+	localizedPaths={localizedPaths}
 >
 	<article>
 		<h1 {...page.edit.title}>{page.data.title}</h1>
@@ -39,3 +47,9 @@ const seo = getSeoMeta(page, {
 		<PortableText value={page.data.content} />
 	</article>
 </Base>
+
+<style>
+	article :global(h2) {
+		margin-top: var(--space-4);
+	}
+</style>

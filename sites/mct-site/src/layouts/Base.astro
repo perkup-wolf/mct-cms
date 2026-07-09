@@ -1,5 +1,6 @@
 ---
-import { getMenu, getSiteSettings } from "emdash";
+import { Font } from "astro:assets";
+import { getEmDashEntry, getI18nConfig, getMenu, getSiteSettings } from "emdash";
 import {
 	WidgetArea,
 	EmDashHead,
@@ -8,7 +9,11 @@ import {
 } from "emdash/ui";
 import { createPublicPageContext } from "emdash/page";
 import LiveSearch from "emdash/ui/search";
+import { getRequestLocale, localeHref } from "../utils/locale-href";
 import { resolveStarterSiteIdentity } from "../utils/site-identity";
+import "../styles/theme.css";
+
+const LOCALE_LABELS: Record<string, string> = { en: "EN", th: "TH" };
 
 interface Props {
 	title: string;
@@ -18,14 +23,43 @@ interface Props {
 	canonical?: string | null;
 	/** Pass content reference for plugin page contributions on content pages */
 	content?: { collection: string; id: string; slug?: string | null };
+	/**
+	 * Locale -> path for this exact piece of content, when known (e.g. a post
+	 * detail page that looked up its sibling translations). Falls back to
+	 * appending `?lang=` to the current URL's path when omitted.
+	 */
+	localizedPaths?: Record<string, string>;
 }
 
-const { title, pageTitle, description, image, canonical, content } = Astro.props;
+const { title, pageTitle, description, image, canonical, content, localizedPaths } = Astro.props;
 const { siteTitle, siteTagline, siteLogo } = resolveStarterSiteIdentity(await getSiteSettings());
 const fullTitle = title.includes(siteTitle) ? title : `${title} — ${siteTitle}`;
 const pageDescription = description ?? siteTagline;
 
 const menu = await getMenu("primary");
+
+// CMS-controlled appearance toggle (edit in /_emdash/admin/content/site_appearance).
+const { entry: appearance, cacheHint: appearanceCacheHint } = await getEmDashEntry(
+	"site_appearance",
+	"default",
+);
+if (Astro.cache?.enabled) Astro.cache.set(appearanceCacheHint);
+const grayscale = appearance?.data.grayscale ?? false;
+
+const { locale: currentLocale, defaultLocale } = await getRequestLocale(Astro.url);
+const i18nConfig = getI18nConfig();
+
+/** Add the current locale to an internal ("/"-rooted) path, e.g. for nav/logo links. */
+function withLocale(path: string): string {
+	if (!path.startsWith("/")) return path;
+	return localeHref(path, currentLocale, defaultLocale);
+}
+
+const localeLinks = (i18nConfig?.locales ?? []).map((locale) => ({
+	locale,
+	label: LOCALE_LABELS[locale] ?? locale.toUpperCase(),
+	href: localizedPaths?.[locale] ?? localeHref(Astro.url.pathname, locale, defaultLocale),
+}));
 
 const pageCtx = createPublicPageContext({
 	Astro,
@@ -42,45 +76,148 @@ const pageCtx = createPublicPageContext({
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={currentLocale} class={grayscale ? "grayscale-mode" : undefined}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>{fullTitle}</title>
 		{pageDescription && <meta name="description" content={pageDescription} />}
 		{canonical && <link rel="canonical" href={canonical} />}
+		<Font cssVariable="--font-display" preload />
+		<Font cssVariable="--font-body" preload />
 		<EmDashHead page={pageCtx} />
 	</head>
 	<body>
 		<EmDashBodyStart page={pageCtx} />
 
-		<header>
-			<nav>
-				<a href="/">
+		<header class="site-header">
+			<nav class="site-nav">
+				<a href={withLocale("/")} class="site-logo">
 					{siteLogo
-						? <img src={siteLogo.url} alt={siteLogo.alt || siteTitle} style="height:48px;width:auto;margin:-8px 0;display:block;" />
+						? <img src={siteLogo.url} alt={siteLogo.alt || siteTitle} style="height:40px;width:auto;display:block;" />
 						: siteTitle
 					}
 				</a>
-				{
-					menu?.items.map((item) => (
-						<a href={item.url} target={item.target}>
-							{item.label}
-						</a>
-					))
-				}
+				<div class="site-nav-links">
+					{
+						menu?.items.map((item) => (
+							<a href={withLocale(item.url)} target={item.target}>
+								{item.label}
+							</a>
+						))
+					}
+				</div>
 				<LiveSearch placeholder="Search..." collections={["posts", "pages"]} />
+				{
+					localeLinks.length > 1 && (
+						<div class="locale-switcher">
+							{localeLinks.map((l) => (
+								<a href={l.href} aria-current={l.locale === currentLocale ? "true" : undefined}>
+									{l.label}
+								</a>
+							))}
+						</div>
+					)
+				}
 			</nav>
 		</header>
 
-		<main>
+		<main class="site-main">
 			<slot />
 		</main>
 
-		<footer>
+		<footer class="site-footer">
 			<WidgetArea name="sidebar" />
 		</footer>
 
 		<EmDashBodyEnd page={pageCtx} />
 	</body>
 </html>
+
+<style>
+	.site-header {
+		border-bottom: 1px solid var(--color-border);
+		background: var(--color-surface);
+	}
+
+	.site-nav {
+		max-width: var(--content-width);
+		margin: 0 auto;
+		padding: var(--space-2) var(--space-3);
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+	}
+
+	.site-logo {
+		font-family: var(--font-display);
+		font-weight: 600;
+		font-size: 1.25rem;
+		color: var(--color-text);
+	}
+
+	.site-logo:hover {
+		text-decoration: none;
+		color: var(--color-accent);
+	}
+
+	.site-nav-links {
+		display: flex;
+		gap: var(--space-2);
+		flex: 1;
+	}
+
+	.site-nav-links a {
+		color: var(--color-text-muted);
+		font-size: 0.9375rem;
+	}
+
+	.site-nav-links a:hover {
+		color: var(--color-accent);
+		text-decoration: none;
+	}
+
+	.locale-switcher {
+		display: flex;
+		gap: 0.25rem;
+		border: 1px solid var(--color-border);
+		border-radius: 999px;
+		padding: 0.125rem;
+	}
+
+	.locale-switcher a {
+		padding: 0.25rem 0.625rem;
+		border-radius: 999px;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--color-text-muted);
+	}
+
+	.locale-switcher a:hover {
+		text-decoration: none;
+		color: var(--color-text);
+	}
+
+	.locale-switcher a[aria-current="true"] {
+		background: var(--color-accent);
+		color: #fff;
+	}
+
+	.site-main {
+		max-width: var(--content-width);
+		margin: 0 auto;
+		padding: var(--space-5) var(--space-3);
+		min-height: 60vh;
+	}
+
+	.site-footer {
+		border-top: 1px solid var(--color-border);
+		margin-top: var(--space-5);
+		padding: var(--space-4) var(--space-3);
+	}
+
+	.site-footer:empty {
+		display: none;
+	}
+</style>
+
