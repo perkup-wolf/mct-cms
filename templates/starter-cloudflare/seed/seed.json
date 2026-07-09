@@ -54,7 +54,7 @@
 				{
 					"slug": "translation_of",
 					"label": "Translation of (original record)",
-					"type": "relationship",
+					"type": "reference",
 					"required": false,
 					"collection": "posts"
 				}
@@ -94,7 +94,7 @@
 				{
 					"slug": "translation_of",
 					"label": "Translation of (original record)",
-					"type": "relationship",
+					"type": "reference",
 					"required": false,
 					"collection": "pages"
 				}
