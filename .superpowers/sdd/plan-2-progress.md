@@ -1,10 +1,10 @@
 # SDD Progress Ledger — Plan 2: Audit Log Plugin
 
 ## Status
-- Task 1: pending (scaffold plugin + storage declaration + register in astro.config.mjs)
-- Task 2: pending (content + system event hooks)
-- Task 3: pending (React admin page + plugin route)
-- Task 4: pending (90-day retention cron)
+- Task 1: COMPLETE (commit 279f9f23 — scaffold + storage + astro.config.mjs registration)
+- Task 2: COMPLETE (commit 8549a2a9 — 7 hooks: content:afterSave/Delete/Restore, plugin:install/activate/deactivate/uninstall)
+- Task 3: COMPLETE (commit 27cb0eb2 — admin page with category/date filters + entries route)
+- Task 4: COMPLETE (commit 795285f0 — 90-day cron purge via batched query+deleteMany)
 
 ## Key Architecture Decisions (from codebase research)
 - Plugin lives at `templates/starter-cloudflare/src/plugins/audit-log/`

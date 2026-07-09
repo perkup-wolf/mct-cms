@@ -29,4 +29,14 @@ export default defineConfig({
 		}),
 	],
 	devToolbar: { enabled: false },
+	vite: {
+		define: {
+			// @astrojs/cloudflare sets "process.env": "process.env" (passthrough) so the
+			// Worker gets the real process via nodejs_compat. But the browser has no
+			// process, so @lingui/core's `process.env.NODE_ENV !== "production"` check
+			// throws. Override here: more-specific key wins in Vite's define lookup.
+			"process.env.NODE_ENV": JSON.stringify("development"),
+			"process.env": "{}",
+		},
+	},
 });
