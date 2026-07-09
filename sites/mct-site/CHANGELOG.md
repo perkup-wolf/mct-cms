@@ -1,4 +1,4 @@
-# @emdash-cms/template-starter-cloudflare
+# mct-site
 
 ## 0.0.3
 
