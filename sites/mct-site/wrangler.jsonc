@@ -19,6 +19,13 @@
 			"bucket_name": "mct-site-media",
 		},
 	],
+	// Session storage for @astrojs/cloudflare (auto-required by the adapter)
+	"kv_namespaces": [
+		{
+			"binding": "SESSION",
+			"id": "01fe5107ff5345b0b6f8e9780c989e0d",
+		},
+	],
 	// Drives scheduled publishing, plugin cron, and maintenance (see src/worker.ts)
 	"triggers": {
 		"crons": [
