@@ -5,6 +5,8 @@ const definition: PluginDefinition = {
   id: "audit-log",
   version: "1.0.0",
 
+  capabilities: ["content:read"],
+
   storage: {
     entries: {
       indexes: ["category", "occurred_at", ["category", "occurred_at"]],

@@ -1,75 +1,15 @@
-# EmDash
+# MCT CMS workspace (built on EmDash)
 
-A full-stack TypeScript CMS built on [Astro](https://astro.build/) and [Cloudflare](https://www.cloudflare.com/). EmDash takes the ideas that made WordPress dominant -- extensibility, admin UX, a plugin ecosystem -- and rebuilds them on serverless, type-safe foundations. Plugins run in sandboxed Worker isolates, solving the fundamental security problem with WordPress's plugin architecture.
+This repository is Marco Technology Co.,Ltd's working copy of [EmDash](https://github.com/emdash-cms/emdash) -- a full-stack TypeScript CMS built on [Astro](https://astro.build/) and [Cloudflare](https://www.cloudflare.com/). It has been trimmed to exactly what's needed to build and develop one site, [`sites/mct-site`](sites/mct-site) (white-labeled as "MCT CMS" in its admin panel) -- it is **not** the general-purpose upstream EmDash project. The upstream templates, demo sites, and documentation site have been removed; see [emdash-cms/emdash](https://github.com/emdash-cms/emdash) for the full OSS product, template gallery, and docs.
 
-## Get Started
+The EmDash packages this site depends on ([`packages/core`](packages/core), `admin`, `cloudflare`, `auth`, `auth-atproto`, `blocks`, `gutenberg-to-portable-text`, `plugin-types`, `registry-client`, `registry-lexicons`) are kept in this workspace as `workspace:*` links rather than published npm versions, so fixes made to the CMS itself apply to the site immediately, without a release cycle.
+
+**To develop the site, see [`sites/mct-site/README.md`](sites/mct-site/README.md).** The rest of this document explains the CMS underneath it.
+
+EmDash takes the ideas that made WordPress dominant -- extensibility, admin UX, a plugin ecosystem -- and rebuilds them on serverless, type-safe foundations. Plugins run in sandboxed Worker isolates, solving the fundamental security problem with WordPress's plugin architecture. It runs on Cloudflare (D1 + R2 + Workers) or any Node.js server with SQLite -- no PHP, no separate hosting tier.
 
 > [!IMPORTANT]
-> EmDash depends on Dynamic Workers to run secure sandboxed plugins. Dynamic Workers are currently only available on paid accounts. [Upgrade your account](https://www.cloudflare.com/plans/developer-platform/) (starting at $5/mo) or comment out the `worker_loaders` block of your `wrangler.jsonc` configuration file to disable plugins.
-
-```bash
-npm create emdash@latest
-```
-
-Or deploy directly to your Cloudflare account:
-
-[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/emdash-cms/templates/tree/main/blog-cloudflare)
-
-EmDash runs on Cloudflare (D1 + R2 + Workers) or any Node.js server with SQLite. No PHP, no separate hosting tier -- just deploy your Astro site.
-
-## Templates
-
-EmDash ships with three starter templates:
-
-<table>
-<tr>
-<td width="33%" valign="top">
-
-### Blog
-
-<a href="assets/templates/blog/latest/"><img src="assets/templates/blog/latest/homepage-light-desktop.jpg" alt="Blog template" width="100%"></a>
-
-A classic blog with sidebar widgets, search, and RSS.
-
-- Categories & tags
-- Full-text search
-- Comment-ready
-- RSS feed
-- Dark / light mode
-
-</td>
-<td width="33%" valign="top">
-
-### Marketing
-
-<a href="assets/templates/marketing/latest/"><img src="assets/templates/marketing/latest/homepage-light-desktop.jpg" alt="Marketing template" width="100%"></a>
-
-A conversion-focused landing page with pricing and contact form.
-
-- Hero with CTAs
-- Feature grid
-- Pricing cards
-- FAQ and contact form
-- Dark / light mode
-
-</td>
-<td width="33%" valign="top">
-
-### Portfolio
-
-<a href="assets/templates/portfolio/latest/"><img src="assets/templates/portfolio/latest/work-light-desktop.jpg" alt="Portfolio template" width="100%"></a>
-
-A visual portfolio for showcasing creative work.
-
-- Project grid
-- Tag filtering
-- Case study pages
-- RSS feed
-- Dark / light mode
-<br /><br />
-</td>
-</tr>
-</table>
+> EmDash depends on Dynamic Workers to run secure sandboxed plugins. Dynamic Workers are currently only available on paid Cloudflare accounts. [Upgrade your account](https://www.cloudflare.com/plans/developer-platform/) (starting at $5/mo) or comment out the `worker_loaders` block of `sites/mct-site/wrangler.jsonc` to disable plugins.
 
 ## Why EmDash?
 
@@ -156,32 +96,18 @@ const { entries: posts } = await getEmDashCollection("posts");
 
 ## Status
 
-EmDash is in **beta preview**. We welcome contributions, feedback, plugins, themes, and ideas.
-
-```bash
-npm create emdash@latest
-```
-
-See the [documentation](https://docs.emdashcms.com/) for guides, API reference, and plugin development.
+EmDash upstream is in **beta preview**. Track the project, file issues, or pull in upstream fixes at [emdash-cms/emdash](https://github.com/emdash-cms/emdash); see the [documentation](https://docs.emdashcms.com/) for guides, API reference, and plugin development (also available as an MCP server -- see `sites/mct-site/AGENTS.md`).
 
 ## Development
 
-This is a pnpm monorepo. To contribute:
+This is a pnpm monorepo, trimmed to `sites/mct-site` and its dependency closure:
 
 ```bash
-git clone https://github.com/emdash-cms/emdash.git && cd emdash
 pnpm install
-pnpm build
+pnpm build           # build the vendored EmDash packages
 ```
 
-Run the demo (Node.js + SQLite, no Cloudflare account needed):
-
-```bash
-pnpm --filter emdash-demo seed
-pnpm --filter emdash-demo dev
-```
-
-Open the admin at [http://localhost:4321/\_emdash/admin](http://localhost:4321/_emdash/admin).
+Then work on the site itself -- see [`sites/mct-site/README.md`](sites/mct-site/README.md) for `npx emdash dev`, schema, and deployment.
 
 ```bash
 pnpm test          # run all tests
@@ -190,21 +116,25 @@ pnpm lint:quick    # fast lint (< 1s)
 pnpm format        # format with oxfmt
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full contributor guide.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions when changing the vendored packages (backwards compatibility, changesets, TDD for bugs).
 
-## Repository Structure
+## Repository structure
 
 ```
 packages/
-  core/           Astro integration, APIs, admin UI, CLI
-  auth/           Authentication library
-  blocks/         Portable Text block definitions
-  cloudflare/     Cloudflare adapter (D1, R2, Worker Loader)
-  plugins/        First-party plugins (forms, embeds, SEO, audit-log, etc.)
-  create-emdash/  npm create emdash scaffolding
-  gutenberg-to-portable-text/  WordPress block converter
+  core/                       Astro integration, APIs, admin UI runtime, CLI
+  admin/                      Admin panel React app (Sidebar, Settings, media library, etc.)
+  auth/                       Authentication library
+  auth-atproto/               AT Protocol auth (optional peer dependency of core)
+  blocks/                     Portable Text block definitions
+  cloudflare/                 Cloudflare adapter (D1, R2, Worker Loader)
+  gutenberg-to-portable-text/ WordPress block converter
+  plugin-types/               Shared plugin type definitions
+  registry-client/            Plugin registry client
+  registry-lexicons/          Plugin registry schema lexicons
 
-templates/        Starter templates (blog, marketing, portfolio, starter, blank)
-demos/            Development and example sites
-docs/             Documentation site (Starlight)
+sites/
+  mct-site/                   The actual site -- see its own README.md
 ```
+
+This repo intentionally does **not** contain the upstream project's `templates/`, `demos/`, `docs/`, or `packages/create-emdash` -- they were removed to keep this workspace scoped to `sites/mct-site`. Reach for the upstream repo if you need those.

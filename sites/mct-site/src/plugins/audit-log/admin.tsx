@@ -40,10 +40,11 @@ function AuditLogPage() {
 
       const res = await fetch("/_emdash/api/plugins/audit-log/entries", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "X-EmDash-Request": "1" },
         body: JSON.stringify(body),
       });
-      const data = await res.json() as { items: AuditEntry[]; hasMore: boolean; cursor?: string };
+      const json = await res.json() as { data: { items: AuditEntry[]; hasMore: boolean; cursor?: string } };
+      const data = json.data;
 
       if (resetCursor) {
         setItems(data.items);
